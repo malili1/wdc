@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.0.js"></script>
+    <script>
+      (function () {
+        var myConnector = tableau.makeConnector();
+
+        myConnector.getSchema = function (schemaCallback) {
+          fetch('https://script.google.com/macros/s/AKfycbzua-oigCLfF_jFKYD1cgqEQZTyyvzgyVgOrfmnlyhTug3FtYpiedpFa6U0TQ1t4oxK/exec')
+            .then(response => response.json())
+            .then(data => {
+              const cols = Object.keys(data[0]).map(key => ({
+                id: key,
+                dataType: tableau.dataTypeEnum.string
+              }));
+              const tableSchema = {
+                id: "googleSheetData",
+                alias: "Google Sheet Data",
+                columns: cols
+              };
+              schemaCallback([tableSchema]);
+            });
+        };
+
+        myConnector.getData = function (table, doneCallback) {
+          fetch('https://script.google.com/macros/s/AKfycbzua-oigCLfF_jFKYD1cgqEQZTyyvzgyVgOrfmnlyhTug3FtYpiedpFa6U0TQ1t4oxK/exec')
+            .then(response => response.json())
+            .then(data => {
+              table.appendRows(data);
+              doneCallback();
+            });
+        };
+
+        tableau.registerConnector(myConnector);
+      })();
+
+      function submitForm() {
+        tableau.connectionName = "Google Sheet Connector";
+        tableau.submit();
+      }
+    </script>
+  </head>
+  <body>
+    <h2>Google Sheet Web Data Connector</h2>
+    <button onclick="submitForm()">Connect</button>
+  </body>
+</html>
